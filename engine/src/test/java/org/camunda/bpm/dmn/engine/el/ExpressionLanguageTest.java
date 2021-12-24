@@ -1,9 +1,8 @@
 /*
- * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH
- * under one or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information regarding copyright
- * ownership. Camunda licenses this file to you under the Apache License,
- * Version 2.0; you may not use this file except in compliance with the License.
+ * Copyright © 2015 - 2018 camunda services GmbH and various authors (info@camunda.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
@@ -16,12 +15,6 @@
  */
 package org.camunda.bpm.dmn.engine.el;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.DmnEngineConfiguration;
 import org.camunda.bpm.dmn.engine.impl.DefaultDmnEngineConfiguration;
@@ -37,7 +30,6 @@ import org.camunda.bpm.dmn.engine.impl.spi.el.ElProvider;
 import org.camunda.bpm.dmn.engine.test.DecisionResource;
 import org.camunda.bpm.dmn.engine.test.DmnEngineTest;
 import org.camunda.bpm.dmn.feel.impl.FeelException;
-import org.camunda.bpm.engine.variable.VariableMap;
 import org.camunda.bpm.engine.variable.Variables;
 import org.junit.Test;
 
@@ -58,7 +50,6 @@ public class ExpressionLanguageTest extends DmnEngineTest {
   public static final String EMPTY_EXPRESSIONS_DMN = "org/camunda/bpm/dmn/engine/el/ExpressionLanguageTest.emptyExpressions.dmn";
   public static final String DECISION_WITH_LITERAL_EXPRESSION_DMN = "org/camunda/bpm/dmn/engine/el/ExpressionLanguageTest.decisionLiteralExpression.dmn";
   public static final String CAPITAL_JUEL_DMN = "org/camunda/bpm/dmn/engine/el/ExpressionLanguageTest.JUEL.dmn";
-  public static final String JUEL_EXPRESSIONS_WITH_PROPERTIES_DMN = "org/camunda/bpm/dmn/engine/el/ExpressionLanguageTest.JUEL.expressionsWithProperties.dmn";
   public static final String JUEL = "juel";
 
   protected DefaultScriptEngineResolver scriptEngineResolver;
@@ -242,37 +233,6 @@ public class ExpressionLanguageTest extends DmnEngineTest {
 
     verify(elProvider, atLeastOnce()).createExpression(anyString());
     verify(scriptEngineResolver, never()).getScriptEngineForLanguage(JUEL.toUpperCase());
-  }
-
-  @Test
-  @DecisionResource(resource = JUEL_EXPRESSIONS_WITH_PROPERTIES_DMN)
-  public void testJuelDoesNotShadowInnerProperty() {
-    VariableMap inputs = Variables.createVariables();
-    inputs.putValue("testExpr", "TestProperty");
-
-    Map<String, Object> mapVar = new HashMap<>(1);
-    mapVar.put("b", "B_FROM_MAP");
-    inputs.putValue("a", mapVar);
-    inputs.putValue("b", "B_FROM_CONTEXT");
-
-    DmnDecisionResult result = dmnEngine.evaluateDecision(decision, inputs.asVariableContext());
-
-    assertThat(result.getSingleEntry()).isEqualTo("B_FROM_MAP");
-  }
-
-  @Test
-  @DecisionResource(resource = JUEL_EXPRESSIONS_WITH_PROPERTIES_DMN)
-  public void testJuelResolvesListIndex() {
-    VariableMap inputs = Variables.createVariables();
-    inputs.putValue("testExpr", "TestListIndex");
-
-    List<String> listVar = new ArrayList<>(1);
-    listVar.add("0_FROM_LIST");
-    inputs.putValue("a", listVar);
-
-    DmnDecisionResult result = dmnEngine.evaluateDecision(decision, inputs.asVariableContext());
-
-    assertThat(result.getSingleEntry()).isEqualTo("0_FROM_LIST");
   }
 
   protected DmnEngine createEngineWithDefaultExpressionLanguage(String expressionLanguage) {
